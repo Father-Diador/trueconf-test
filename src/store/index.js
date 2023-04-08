@@ -10,6 +10,7 @@ export default createStore({
       {id: 4, value: 5, name: "Fifth Floor", active: false},
     ],
     queue: [{id: '', value: ""}],
+    queueEl: [{id: '1', value: "1"}],
   },
   getters: {
     GET_FLOOR_COUNT: state => {
@@ -18,13 +19,19 @@ export default createStore({
     GET_QUEUE: state => {
       return state.queue;
     },
+    GET_QUEUE_EL: state => {
+      return state.queueEl;
+    },
   },
   mutations: {
+    SET_FLOORS: (state, payload) => {
+      state.floors = payload;
+    },
     SET_QUEUE: (state, payload) => {
       state.queue = payload;
     },
-    SET_FLOORS: (state, payload) => {
-      state.floors = payload;
+    SET_QUEUE_EL: (state, payload) => {
+      state.queueEl = payload;
     },
   },
   actions: {

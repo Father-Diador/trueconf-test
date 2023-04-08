@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="elevator-position">
-      <Elevator />
+      <Elevator :number="1"/>
     </div>
     <div class="floors-position">
       <Floor
