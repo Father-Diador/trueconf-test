@@ -20,7 +20,8 @@ export default {
     methods: {
         setQueue(){
             let queue = this.$store.getters.GET_QUEUE;
-            queue.push(this.floor.value);
+            let queueObj = {id: this.floor.id, value: this.floor.value};
+            queue.unshift(queueObj);
             console.log(queue);
             this.$store.commit('SET_QUEUE', queue);
 
@@ -34,6 +35,7 @@ export default {
                     console.log("Error!");
                 }
             }
+            
         }
     }
 }
@@ -41,6 +43,7 @@ export default {
 
 <style scoped>
 .floor{
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
