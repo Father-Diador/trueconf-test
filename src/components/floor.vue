@@ -31,11 +31,8 @@ export default {
                     value.active = true;
                     this.$store.commit('SET_FLOORS', floors);
                     return
-                } else {
-                    console.log("Error!");
                 }
             }
-            
         }
     }
 }

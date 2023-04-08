@@ -1,9 +1,13 @@
 <template>
     <div class="elevator" 
         @click="elevatorMovement()"
-        v-bind:style="{ transform: transformValue, transition: transitionValue }"
+        v-bind:style="{ transform: transformValue, background: backgroundValue}"
     >
-        <div class="elevator-title"> {{ getQueue[0].value }} </div>
+        <div class="elevator-title"
+            v-bind:style="{ color: colorValue}"
+        > 
+            {{ getQueue[0].value }} 
+        </div>
     </div>
 </template>
 
@@ -12,7 +16,9 @@ export default {
     data() {
         return {
             transformValue: 'translate(0, calc(-120px * 0))',
-            transitionValue: '1s',
+            backgroundValue: '#ccc',
+
+            colorValue: '#000',
         }
     },
     computed: {
@@ -20,37 +26,50 @@ export default {
             return this.$store.getters.GET_QUEUE;
         }
     },
-    // methods: {
-    //     elevatorMovement() {
-    //         if (this.getQueue[0].id == undefined){
-    //             return
-    //         } else {
-    //             this.transformValue = 'translate(0, calc(-120px * ' + this.getQueue[0].id + '))';
-    //         }
-    //         // let queue = this.$store.getters.GET_QUEUE;
-    //         // queue.shift();
-    //         // console.log(queue);
-    //         // this.$store.commit('SET_QUEUE', queue);
+    methods: {
+        // elevatorMovement() {
+        //     if (this.getQueue[0].id == undefined){
+        //         return
+        //     } else {
+        //         this.transformValue = 'translate(0, calc(-120px * ' + this.getQueue[0].id + '))';
+        //     }
+        //     // let queue = this.$store.getters.GET_QUEUE;
+        //     // queue.shift();
+        //     // console.log(queue);
+        //     // this.$store.commit('SET_QUEUE', queue);
 
-    //         console.log(this.getQueue[0]);
-    //     }
-    // },
-    updated(){
-            if (this.getQueue[0].id == undefined){
-                return
-            } else {
-                this.transformValue = 'translate(0, calc(-120px * ' + this.getQueue[0].id + '))';
-            }
-
+        //     console.log(this.getQueue[0]);
+        // }
+        setIsactive() {
+            this.backgroundValue = 'Red';
+            this.colorValue = '#000';
+            
             let floors = this.$store.getters.GET_FLOOR_COUNT;
             for(let value of floors){
                 if (value.id == this.getQueue[0].id) {
                     value.active = false;
                     this.$store.commit('SET_FLOORS', floors);
-                    return
-                } else {
-                    console.log("Error!");
+                    
                 }
+            }
+
+            let queue = this.$store.getters.GET_QUEUE;
+            queue.pop();
+            console.log(queue);
+            this.$store.commit('SET_QUEUE', queue);
+        }
+    },
+    beforeUpdate(){
+            if (this.getQueue[0].id == undefined){
+                return
+            } else {
+                this.transformValue = 'translate(0, calc(-120px * ' + this.getQueue[0].id + '))';
+                this.backgroundValue = '#808080';
+                this.colorValue = '#fff';
+
+            }
+            if (this.getQueue[1]){
+                setTimeout(this.setIsactive, 3000)
             }
     }
 }
@@ -58,7 +77,7 @@ export default {
 
 <style scoped>
 .elevator{
-    background: #ccc;
+    transition: 1s;
     position: absolute;
     bottom: 0;
     display: flex;
@@ -77,6 +96,7 @@ export default {
     transition: 1s;
 } */
 .elevator-title{
+    transition: 1s;
     font-size: 30px;
 }
 /* .elevator-btn-outside{
