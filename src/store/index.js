@@ -9,12 +9,18 @@ export default createStore({
       {id: 3, value: 4, name: "Fourth Floor", active: false},
       {id: 4, value: 5, name: "Fifth Floor", active: false},
     ],
-    queue: [{id: '', value: ""}],
-    queueEl: [{id: '1', value: "1"}],
+    elevators: [
+      {id: 1},
+    ],
+    queue: [{id: '', value: ''}],
+    queueEl: [{id: '1', value: '1'}],
   },
   getters: {
     GET_FLOOR_COUNT: state => {
       return state.floors;
+    },
+    GET_ELEVATOR_COUNT: state => {
+      return state.elevators;
     },
     GET_QUEUE: state => {
       return state.queue;
@@ -26,6 +32,9 @@ export default createStore({
   mutations: {
     SET_FLOORS: (state, payload) => {
       state.floors = payload;
+    },
+    SET_ELEVATORS: (state, payload) => {
+      state.elevators = payload;
     },
     SET_QUEUE: (state, payload) => {
       state.queue = payload;

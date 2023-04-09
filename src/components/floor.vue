@@ -1,5 +1,7 @@
 <template>
-    <div class="floor">
+    <div class="floor"
+        v-bind:style="{ height: getFloorsCount }"
+    >
         <div> {{ floor.name }} </div>
         <div class="floor-btn-outside" 
             @click="setQueue()"
@@ -22,15 +24,16 @@ export default {
             type: Object,
         }
     },
+    computed: {
+        getFloorsCount() {
+            let arr = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
+            let height = 'calc(100vh / ' + arr.length + ')';
+            return height;
+        }
+    },
     methods: {
         setQueue(){
             let queue = this.$store.getters.GET_QUEUE;
-            // for(let one of queue){
-            //     if(one.id == this.floor.value){
-            //         console.log(queue);
-            //         return
-            //     }
-            // }
 
             let queueObj = {id: this.floor.id, value: this.floor.value};
             queue.push(queueObj);
@@ -64,8 +67,8 @@ export default {
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 40%;
-    height: 120px;
+    width: 100%;
+    // height: 120px;
     background: #fff;
     border: 2px solid #000;
 }
