@@ -10,7 +10,7 @@ export default createStore({
       {id: 4, value: 5, name: "Fifth Floor", active: false},
     ],
     elevators: [
-      {id: 1},
+      {id: 1, destination: ''},
     ],
     queue: [{id: '', value: ''}],
     queueEl: [{id: '1', value: '1'}],

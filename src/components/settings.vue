@@ -42,20 +42,23 @@ export default {
         floorsCounter(status) {
             let floors = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
             let floorsCount =  floors.length;
-            if(floorsCount === 10){
-                alert('Достигнута макссимальная величина');
-                return;
-            } else if (floorsCount === 2) {
-                alert('Достигнута минимальная величина');
-                return;
-            }
             if(status === 1){
-                let plusFloor = {id: floorsCount, value: floorsCount + 1, name: floorsCount + 1 + " Floor", active: false};
-                floors.push(plusFloor);
-                console.log(floors);
-            } else{
-                floors.pop();
-                console.log(floors);
+                if(floorsCount === 10){
+                    alert('Достигнута макссимальная величина');
+                    return;
+                } else {
+                    let plusFloor = {id: floorsCount, value: floorsCount + 1, name: floorsCount + 1 + " Floor", active: false};
+                    floors.push(plusFloor);
+                    console.log(floors);
+                }
+            } else {
+                if (floorsCount === 2) {
+                    alert('Достигнута минимальная величина');
+                    return;
+                } else {
+                    floors.pop();
+                    console.log(floors);
+                }
             }
             this.$store.commit('SET_FLOORS', floors);
         },

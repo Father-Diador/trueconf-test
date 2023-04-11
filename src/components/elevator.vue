@@ -25,6 +25,7 @@
 </template>
 
 <script>
+
 export default {
     props: {
         number: {
@@ -62,14 +63,13 @@ export default {
             if(this.currentFloor < this.getQueue[this.number].value){
                 let timerId = setInterval(() => this.currentFloor += 1, 1000);
                 setTimeout(() => { clearInterval(timerId); this.currentFloor = this.getQueue[this.number].value}, this.getQueue[this.number].id * 1000);
-                console.log(this.currentFloor, this.getQueue[this.number].value);
+                console.log(this.currentFloor);
 
             } else if (this.currentFloor > this.getQueue[this.number].value) {
                 let timerId = setInterval(() => this.currentFloor -= 1, 1000);
                 setTimeout(() => { clearInterval(timerId); this.currentFloor = this.getQueue[this.number].value}, (this.currentFloor - this.getQueue[this.number].value) * 1000);
-                console.log(this.currentFloor, this.getQueue[this.number].value);
+                console.log("minus");
             }
-            console.log(this.currentFloor + "w" + this.getQueue[this.number].value);
         },
         setIsactive() {
             this.transitionValue = '1s linear';
@@ -87,6 +87,13 @@ export default {
             let queue = this.$store.getters.GET_QUEUE;
             queue.shift();
             this.$store.commit('SET_QUEUE', queue);
+
+            let allElevators = this.$store.getters.GET_ELEVATOR_COUNT;
+            for(let elevID of allElevators){
+                if(elevID.id === this.number){
+                    elevID.destination = '';
+                }
+            }
             this.start = true;
         },
         onMove() {
@@ -104,6 +111,20 @@ export default {
                     this.direction = '↑';
                 }
                 this.start = false;
+                console.log(this.getQueue[this.number].id);
+                let allElevators = this.$store.getters.GET_ELEVATOR_COUNT;
+                for(let elevIsActive of allElevators){
+                    if(elevIsActive.destination === this.getQueue[this.number].id){
+                        return;
+                    }
+                    else {
+                for(let elev of allElevators){
+                    if(elev.id === this.number){
+                        elev.destination = this.getQueue[this.number].id;
+                        
+                    }
+                }
+                // this.$store.commit('SET_ELEVATORS', floors);
                 this.transformValue = 'translate(0, calc( -1 * ' + this.getFloorsCount + ' * ' + this.getQueue[this.number].id + '))';
                 let firstTime = 0;
                 if(this.getQueue[0].value === ''){
@@ -121,6 +142,9 @@ export default {
 
                 setTimeout(this.onMove, timeoutTime);
             }
+        }
+            }
+            
     }
 }
 </script>
@@ -182,11 +206,12 @@ export default {
     font-family: 'Courier New', Courier, monospace;
     font-weight: 600;
     font-size: 20px;
-    margin-top: 40px;
+    margin-top: 10px;
     background: #fff;
     padding: 10px;
     border: 2px solid #000;
-    border-radius: 50%;
+    color: #000;
+    border-radius: 5px;
     width: 20px;
     height: 20px;
     text-align: center;
