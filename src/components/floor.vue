@@ -8,16 +8,15 @@
             v-bind:class="{ active: floor.active }"
         >
             <div class="floor-btn-inside">
-                <div class="floor-btn-circle">
-
-                </div>
-                <!-- {{ floor.value }} -->
+                <div class="floor-btn-circle"></div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { FloorManager } from '@/service';
+
 export default {
     props: {
         floor: {
@@ -33,25 +32,7 @@ export default {
     },
     methods: {
         setQueue(){
-            let queue = this.$store.getters.GET_QUEUE;
-
-            let queueObj = {id: this.floor.id, value: this.floor.value};
-            queue.push(queueObj);
-            this.$store.commit('SET_QUEUE', queue);
-
-            let queueEl = this.$store.getters.GET_QUEUE_EL;
-            let queueElObj = {id: this.floor.id, value: this.floor.value};
-            queueEl.unshift(queueElObj);
-            this.$store.commit('SET_QUEUE_EL', queueEl);
-
-            let floors = this.$store.getters.GET_FLOOR_COUNT;
-            for(let value of floors){
-                if (value.id === this.floor.id) {
-                    value.active = true;
-                    this.$store.commit('SET_FLOORS', floors);
-                    return
-                }
-            }
+            FloorManager.setTaskInQueue(this.floor);
         }
     }
 }

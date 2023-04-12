@@ -13,10 +13,32 @@
           Состояние отдыха
         </div>
     </div>
+    <ElevatorInfo />
+    <button class="delete-local" @click="deleteLocalStorage()"> 
+      Очистить локальное хранилище 
+    </button>
 </template>
+
+<script>
+import { ConfigManager } from '@/service';
+import ElevatorInfo from "@/components/elevatorInfo.vue";
+
+export default {
+  components: {
+    ElevatorInfo,
+  },
+  methods: {
+    deleteLocalStorage() {
+      ConfigManager.deleteLocalStorage();
+      console.log("Успешно очищено!");
+    }
+  }
+}
+</script>
 
 <style scoped>
 .position-info{
+    margin-bottom: 50px;
     width: 80%;
     display: flex;
     flex-direction: column;
@@ -44,5 +66,21 @@
 }
 .move-state{
   background: #42aaff;
+}
+.delete-local{
+  width: 70%;
+  box-sizing: border-box;
+  padding: 10px 20px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  font-weight: 500;
+  background: #ff9466;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+  color: #fff;
+}
+.delete-local:hover{
+    background: #ff4d00;
 }
 </style>

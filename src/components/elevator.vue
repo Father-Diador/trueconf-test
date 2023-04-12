@@ -10,14 +10,20 @@
                     <div class="numb">
                         {{ direction }}
                     </div>
-                    <div v-if="!getQueue[this.number]" class="numb">
-                        {{ getQueueEl[0].value }} 
-                    </div>
-                    <div v-if="getQueue[this.number]" class="numb">
-                        {{ getQueue[this.number].value }} 
+                    <div class="numb">
+                        {{ getElevators[this.number - 1].currentFloor }} 
                     </div>
                 </div>
-                <div class="current-floor"> {{ currentFloor }} </div>
+                <div class="elevator-doors"> 
+                    <div class="door left"
+                        v-bind:style="{ width: widthValue }"
+                    >
+                    </div>
+                    <div class="door right"
+                        v-bind:style="{ width: widthValue }"
+                    >
+                    </div>
+                </div>
             </div>
             
         </div>
@@ -25,6 +31,7 @@
 </template>
 
 <script>
+import { ElevatorManager } from '@/service';
 
 export default {
     props: {
@@ -43,6 +50,8 @@ export default {
             start: true,
             direction: ' ',
             currentFloor: 1,
+
+            widthValue: '50%',
         }
     },
     computed: {
@@ -51,100 +60,120 @@ export default {
             let height = 'calc(100vh / ' + arr.length + ')';
             return height;
         },
+        getElevators() {
+            return this.$store.getters.GET_ELEVATOR_COUNT;
+        },
         getQueue() {
             return this.$store.getters.GET_QUEUE;
         },
-        getQueueEl() {
-            return this.$store.getters.GET_QUEUE_EL;
-        }
     },
-    methods: {
-        currentFloorCounter() {
-            if(this.currentFloor < this.getQueue[this.number].value){
-                let timerId = setInterval(() => this.currentFloor += 1, 1000);
-                setTimeout(() => { clearInterval(timerId); this.currentFloor = this.getQueue[this.number].value}, this.getQueue[this.number].id * 1000);
-                console.log(this.currentFloor);
-
-            } else if (this.currentFloor > this.getQueue[this.number].value) {
-                let timerId = setInterval(() => this.currentFloor -= 1, 1000);
-                setTimeout(() => { clearInterval(timerId); this.currentFloor = this.getQueue[this.number].value}, (this.currentFloor - this.getQueue[this.number].value) * 1000);
-                console.log("minus");
+    watch: {
+        currentFloor(){
+            if(this.getElevators[this.number - 1].currentFloor === this.getElevators[this.number - 1].destinationFloor){
+                this.onMove();
             }
+        }
+    },  
+    methods: {
+        closeDoors(){
+            this.widthValue = '50%';
         },
-        setIsactive() {
-            this.transitionValue = '1s linear';
+        setInactive() {
+            // смена стилей на остановку лифта
             this.backgroundValue = '#ccc';
             this.colorValue = '#000';
+
+            ElevatorManager.buttonInactive(this.number);
+
+            ElevatorManager.cleansingQueue();
             
-            let floors = this.$store.getters.GET_FLOOR_COUNT;
-            for(let value of floors){
-                if (value.id == this.getQueue[this.number].id) {
-                    value.active = false;
-                    this.$store.commit('SET_FLOORS', floors);
-                }
-            }
+            ElevatorManager.cleansingElDestination(this.number);
 
-            let queue = this.$store.getters.GET_QUEUE;
-            queue.shift();
-            this.$store.commit('SET_QUEUE', queue);
-
-            let allElevators = this.$store.getters.GET_ELEVATOR_COUNT;
-            for(let elevID of allElevators){
-                if(elevID.id === this.number){
-                    elevID.destination = '';
-                }
-            }
-            this.start = true;
+            this.direction = ' ';
+            this.start = true; //разрешение на запуск повторной функции
         },
         onMove() {
-            this.transitionValue = '1s linear';
+            // функция на смену стилей при отдыха лифта
             this.backgroundValue = '#3574e8';
             this.colorValue = '#fff';
-            setTimeout(this.setIsactive, 3000)
-        }
-    },
-    beforeUpdate(){
-            if(this.getQueue[this.number] && this.start === true) {
-                if(this.getQueue[this.number].id < this.getQueue[0].id){
-                    this.direction = '↓';
-                } else{
-                    this.direction = '↑';
-                }
-                this.start = false;
-                console.log(this.getQueue[this.number].id);
-                let allElevators = this.$store.getters.GET_ELEVATOR_COUNT;
-                for(let elevIsActive of allElevators){
-                    if(elevIsActive.destination === this.getQueue[this.number].id){
-                        return;
-                    }
-                    else {
-                for(let elev of allElevators){
-                    if(elev.id === this.number){
-                        elev.destination = this.getQueue[this.number].id;
-                        
-                    }
-                }
-                // this.$store.commit('SET_ELEVATORS', floors);
-                this.transformValue = 'translate(0, calc( -1 * ' + this.getFloorsCount + ' * ' + this.getQueue[this.number].id + '))';
-                let firstTime = 0;
-                if(this.getQueue[0].value === ''){
-                    firstTime = 1;
-                } else {
-                    firstTime = this.getQueue[0].value
-                }
-                let time = Math.abs(firstTime - this.getQueue[this.number].value);
-                this.transitionValue = time + 's linear';
-                this.backgroundValue = '#42aaff';
-                this.colorValue = '#fff';
-                let timeoutTime = time * 1000;
-                
-                this.currentFloorCounter();
+            this.widthValue = '10%';
 
-                setTimeout(this.onMove, timeoutTime);
-            }
-        }
+            setTimeout(this.closeDoors, 2000);
+            setTimeout(this.setInactive, 3000); // запуск функции на инактив лифта
+        },
+        elevatorStart() {
+            this.start = false; // запрет на старт функции заново
+                
+            this.direction = ElevatorManager.moveDirection(this.number); // стрелочки
+            let currentPosition = this.getElevators[this.number - 1].currentFloor;
+            let destinationPosition = this.getElevators[this.number - 1].destinationFloor;
+            if(currentPosition < destinationPosition) {
+                    let time = destinationPosition - currentPosition;
+                    this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1');
+                    let timerForFloorPlus = setInterval(() => {
+                        currentPosition = Number(currentPosition) + 1;
+                        this.currentFloor = currentPosition;
+                        ElevatorManager.setCurrentFloor(this.number, currentPosition);
+                        if(currentPosition != destinationPosition){
+                            this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1')
+                        }
+                        localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
+                    }, 1000);
+                    setTimeout(() => { clearInterval(timerForFloorPlus); }, time * 1000);
+            } 
+            else if(currentPosition > destinationPosition) {
+                    let time = currentPosition - destinationPosition;
+                    this.transformValue = this.transformValue + ElevatorManager.moveCycle('1');
+                    let timerForFloorMin = setInterval(() => {
+                        currentPosition = Number(currentPosition) - 1;
+                        this.currentFloor = currentPosition;
+                        ElevatorManager.setCurrentFloor(this.number, currentPosition);
+                        if(currentPosition != destinationPosition){
+                            this.transformValue = this.transformValue + ElevatorManager.moveCycle('1')
+                        } 
+                        localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
+                    }, 1000);
+                    setTimeout(() => { clearInterval(timerForFloorMin); }, time * 1000);
+            } 
+            else if(currentPosition == destinationPosition) {
+                this.onMove();
             }
             
+            this.backgroundValue = '#42aaff';
+            this.colorValue = '#fff';
+            let allElevators = this.getElevators; // получение списка лифтов
+            console.log("Лифт номер: " + allElevators[this.number - 1].id + ", едет на этаж: " + allElevators[this.number - 1].destinationFloor + ", с этажа: " + allElevators[this.number - 1].currentFloor);
+        },
+        elevatorCheck() {
+            if(this.getQueue[this.number] && this.start === true) { // проверка на существование очереди
+                
+                let checkCurrentExecution = ElevatorManager.checkCurrentExecution(this.number); // проверка на выполнение задачи другим лифтом
+                if(checkCurrentExecution === false) {
+                    return
+                }
+                this.elevatorStart();
+            }
+        },
+        mountingFunction() {
+            let arr = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
+            let El = this.$store.getters.GET_ELEVATOR_COUNT[this.number - 1];
+            let height = 'calc(100vh / ' + arr.length + ')';
+            if(El.currentFloor){
+                this.transformValue = 'translate(0, calc( -1 * ' + height + ' * ' + (Number(El.currentFloor) - 1) + ' ))';
+            } else {
+                return
+            }
+            if(this.getQueue[this.number]){
+                this.elevatorStart();
+                console.log(this.transformValue);
+            }
+        },
+    },
+    beforeMount() {
+        this.mountingFunction();
+    },
+    beforeUpdate(){
+            this.elevatorCheck();
     }
 }
 </script>
@@ -162,19 +191,13 @@ export default {
     position: absolute;
     bottom: 0;
     width: 100%;
-    /* display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    border-top: 2px solid #000;
-    border-bottom: 2px solid #000;
-    box-sizing: border-box; */
 }
 .elevator-inside{
     transition: 1s;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
     width: 100%;
     height: 100%;
     border-top: 2px solid #000;
@@ -183,10 +206,11 @@ export default {
 }
 .elevator-title{
     border: 2px solid#000;
-    padding: 5px 10px;
+    padding: 2px 10px;
     background: #fff;
     border-radius: 5px;
-    margin-top: 5px;
+    margin-top: 3%;
+    margin-bottom: 3%;
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
@@ -194,26 +218,33 @@ export default {
     align-content: center;
     align-items: center;
     width: 60%;
+    height: 20%;
     transition: 1s;
     font-family: 'Courier New', Courier, monospace;
     font-weight: 600;
     font-size: 30px;
+    box-sizing: border-box;
 }
 .numb{
     margin: auto 0;
 }
-.current-floor{
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: 600;
-    font-size: 20px;
-    margin-top: 10px;
-    background: #fff;
-    padding: 10px;
-    border: 2px solid #000;
-    color: #000;
-    border-radius: 5px;
-    width: 20px;
-    height: 20px;
-    text-align: center;
+.elevator-doors{
+    width: 100%;
+    height: 74%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: 2px solid#000;
+    background: #b5b8b1;
+}
+.door{
+    background: #666666;
+    transition: 1s;
+}
+.left{
+    border-right: 2px solid#000;
+}
+.right{
+    border-left: 2px solid#000;
 }
 </style>

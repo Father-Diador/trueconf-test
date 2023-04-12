@@ -63,8 +63,30 @@ export default {
     },
     getQueue() {
       return this.$store.getters.GET_QUEUE;
-    }
+    },
   },
+  beforeCreate() {
+    if (!localStorage.getItem('Elevators')) {
+        localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
+    } else {
+        this.Elevators = JSON.parse(localStorage.getItem('Elevators'));
+        this.$store.commit('SET_ELEVATORS', this.Elevators);
+    }
+
+    if (!localStorage.getItem('Queue')) {
+        localStorage.setItem('Queue', JSON.stringify(this.$store.getters.GET_QUEUE));
+    } else {
+        this.Queue = JSON.parse(localStorage.getItem('Queue'));
+        this.$store.commit('SET_QUEUE', this.Queue);
+    }
+
+    if (!localStorage.getItem('Floors')) {
+      localStorage.setItem('Floors', JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));;
+    } else {
+        this.Floors = JSON.parse(localStorage.getItem('Floors'));
+        this.$store.commit('SET_FLOORS', this.Floors);
+    }
+  }
 }
 </script>
 

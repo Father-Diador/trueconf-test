@@ -1,28 +1,40 @@
 <template>
     <div class="wrapper-set" @click="closeSettings()">
-        <div class="settings-window" @click.stop>
-            <div class="settings-title">
-                Колличество этажей
-                <div class="settings-btn-pos">
-                    <button class="green" @click="floorsCounter(1)">+</button>
-                    <p> {{ floorsCount }} </p>
-                    <button class="red" @click="floorsCounter(2)">-</button>
+        <div class="settings-window-pos" @click.stop>
+            <div class="settings-window">
+                <div class="settings-title">
+                    Колличество этажей
+                    <div class="settings-btn-pos">
+                        <button class="green" @click="floorsCounter(1)">+</button>
+                        <p> {{ floorsCount }} </p>
+                        <button class="red" @click="floorsCounter(2)">-</button>
+                    </div>
+                </div>
+                <div class="settings-title">
+                    Колличество лифтов
+                    <div class="settings-btn-pos">
+                        <button class="green" @click="elevCounter(1)">+</button>
+                        <p> {{ elevatorsCount }} </p>
+                        <button class="red" @click="elevCounter(2)">-</button>
+                    </div>
                 </div>
             </div>
-            <div class="settings-title">
-                Колличество лифтов
-                <div class="settings-btn-pos">
-                    <button class="green" @click="elevCounter(1)">+</button>
-                    <p> {{ elevatorsCount }} </p>
-                    <button class="red" @click="elevCounter(2)">-</button>
-                </div>
+            <div class="error">
+                {{ error }}
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { ConfigManager } from '@/service';
+
 export default {
+    data() {
+        return{
+            error: ' ',
+        }
+    },
     computed: {
         floorsCount() {
             let arrFloors = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
@@ -40,52 +52,10 @@ export default {
             this.$emit('create');
         },
         floorsCounter(status) {
-            let floors = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
-            let floorsCount =  floors.length;
-            if(status === 1){
-                if(floorsCount === 10){
-                    alert('Достигнута макссимальная величина');
-                    return;
-                } else {
-                    let plusFloor = {id: floorsCount, value: floorsCount + 1, name: floorsCount + 1 + " Floor", active: false};
-                    floors.push(plusFloor);
-                    console.log(floors);
-                }
-            } else {
-                if (floorsCount === 2) {
-                    alert('Достигнута минимальная величина');
-                    return;
-                } else {
-                    floors.pop();
-                    console.log(floors);
-                }
-            }
-            this.$store.commit('SET_FLOORS', floors);
+            this.error = ConfigManager.floorsCounter(status); 
         },
         elevCounter(status) {
-            let floors = JSON.parse(JSON.stringify(this.$store.getters.GET_FLOOR_COUNT));
-            let floorsCount =  floors.length - 1;
-
-            let elevators = JSON.parse(JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
-            let elevatorsCount =  elevators.length;
-            console.log(elevatorsCount);
-            if(status === 1){
-                if(elevatorsCount === floorsCount){
-                    alert('Достигнута макссимальное колличество лифтов для колличества этажей');
-                    return;
-                }
-                let plusEl = {id: elevatorsCount + 1};
-                elevators.push(plusEl);
-                console.log(elevators);
-            } else {
-                if (elevatorsCount === 1) {
-                    alert('Достигнута минимальная величина');
-                    return;
-                }
-                elevators.pop();
-                console.log(elevators);
-            }
-            this.$store.commit('SET_ELEVATORS', elevators);
+            this.error = ConfigManager.elevCounter(status);
         }
     }
 }
@@ -102,29 +72,50 @@ export default {
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.6);
 }
-.settings-window{
+.settings-window-pos{
     z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 60%;
+    height: calc(100vh / 2);
+    background: #fff;
+    border-radius: 10px;
+}
+.settings-window{
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
     padding: 30px;
     box-sizing: border-box;
-    width: 60%;
-    height: calc(100vh / 2);
-    background: #fff;
-    border-radius: 10px;
+    width: 100%;
 }
 .settings-title{
+    width: 45%;
+    text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 30%;
+    align-items: center;
+    height: 100%;
     font-family: 'Courier New', Courier, monospace;
     font-weight: 500;
     font-size: 30px;
 }
+.error{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 500;
+    font-size: 25px;
+    border: none;
+    color: #000;
+    transition: 0.3s;
+    text-align: center;
+}
 .settings-btn-pos{
+    width: 50%;
+    margin-top: 30px;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
