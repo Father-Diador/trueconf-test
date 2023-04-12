@@ -25,7 +25,6 @@
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </template>
@@ -50,7 +49,6 @@ export default {
             start: true,
             direction: ' ',
             currentFloor: 1,
-
             widthValue: '50%',
         }
     },
@@ -93,12 +91,12 @@ export default {
             this.start = true; //разрешение на запуск повторной функции
         },
         onMove() {
-            // функция на смену стилей при отдыха лифта
+            // функция на смену стилей при отдыхе лифта
             this.backgroundValue = '#3574e8';
             this.colorValue = '#fff';
             this.widthValue = '10%';
 
-            setTimeout(this.closeDoors, 2000);
+            setTimeout(this.closeDoors, 2000); // запуск функции на закрытие дверей
             setTimeout(this.setInactive, 3000); // запуск функции на инактив лифта
         },
         elevatorStart() {
@@ -108,32 +106,32 @@ export default {
             let currentPosition = this.getElevators[this.number - 1].currentFloor;
             let destinationPosition = this.getElevators[this.number - 1].destinationFloor;
             if(currentPosition < destinationPosition) {
-                    let time = destinationPosition - currentPosition;
-                    this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1');
-                    let timerForFloorPlus = setInterval(() => {
-                        currentPosition = Number(currentPosition) + 1;
-                        this.currentFloor = currentPosition;
-                        ElevatorManager.setCurrentFloor(this.number, currentPosition);
-                        if(currentPosition != destinationPosition){
-                            this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1')
-                        }
-                        localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
-                    }, 1000);
-                    setTimeout(() => { clearInterval(timerForFloorPlus); }, time * 1000);
+                let time = destinationPosition - currentPosition;
+                this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1');
+                let timerForFloorPlus = setInterval(() => {
+                    currentPosition = Number(currentPosition) + 1;
+                    this.currentFloor = currentPosition;
+                    ElevatorManager.setCurrentFloor(this.number, currentPosition);
+                    if(currentPosition != destinationPosition){
+                        this.transformValue = this.transformValue + ElevatorManager.moveCycle('-1')
+                    }
+                    localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
+                }, 1000);
+                setTimeout(() => { clearInterval(timerForFloorPlus); }, time * 1000);
             } 
             else if(currentPosition > destinationPosition) {
-                    let time = currentPosition - destinationPosition;
-                    this.transformValue = this.transformValue + ElevatorManager.moveCycle('1');
-                    let timerForFloorMin = setInterval(() => {
-                        currentPosition = Number(currentPosition) - 1;
-                        this.currentFloor = currentPosition;
-                        ElevatorManager.setCurrentFloor(this.number, currentPosition);
-                        if(currentPosition != destinationPosition){
-                            this.transformValue = this.transformValue + ElevatorManager.moveCycle('1')
-                        } 
-                        localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
-                    }, 1000);
-                    setTimeout(() => { clearInterval(timerForFloorMin); }, time * 1000);
+                let time = currentPosition - destinationPosition;
+                this.transformValue = this.transformValue + ElevatorManager.moveCycle('1');
+                let timerForFloorMin = setInterval(() => {
+                    currentPosition = Number(currentPosition) - 1;
+                    this.currentFloor = currentPosition;
+                    ElevatorManager.setCurrentFloor(this.number, currentPosition);
+                    if(currentPosition != destinationPosition){
+                        this.transformValue = this.transformValue + ElevatorManager.moveCycle('1')
+                    } 
+                    localStorage.setItem('Elevators', JSON.stringify(this.$store.getters.GET_ELEVATOR_COUNT));
+                }, 1000);
+                setTimeout(() => { clearInterval(timerForFloorMin); }, time * 1000);
             } 
             else if(currentPosition == destinationPosition) {
                 this.onMove();
@@ -146,12 +144,11 @@ export default {
         },
         elevatorCheck() {
             if(this.getQueue[this.number] && this.start === true) { // проверка на существование очереди
-                
                 let checkCurrentExecution = ElevatorManager.checkCurrentExecution(this.number); // проверка на выполнение задачи другим лифтом
                 if(checkCurrentExecution === false) {
                     return
                 }
-                this.elevatorStart();
+                this.elevatorStart(); // запуск лифта
             }
         },
         mountingFunction() {
@@ -164,8 +161,7 @@ export default {
                 return
             }
             if(this.getQueue[this.number]){
-                this.elevatorStart();
-                console.log(this.transformValue);
+                this.elevatorStart(); // запуск лифта
             }
         },
     },
@@ -173,7 +169,7 @@ export default {
         this.mountingFunction();
     },
     beforeUpdate(){
-            this.elevatorCheck();
+        this.elevatorCheck();
     }
 }
 </script>
